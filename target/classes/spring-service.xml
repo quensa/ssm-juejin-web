@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context.xsd
+   http://www.springframework.org/schema/tx
+   http://www.springframework.org/schema/tx/spring-tx.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 扫描service相关的bean -->
+    <context:component-scan base-package="com.lf.service"/>
+
+    <!-- 配置事物管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 注入数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+
+    <!-- 配置基于注解的声明式事务 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!-- 对ins,upd,del开头的方法进行事务管理,只要有异常就回滚 -->
+            <tx:method name="ins*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="del*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="upd*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <!--对于其它方法，开启只读-->
+            <tx:method name="*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--    &lt;!&ndash; AOP 切面&ndash;&gt;-->
+    <!--    <aop:config>-->
+    <!--        &lt;!&ndash; 定义切入点 &ndash;&gt;-->
+    <!--        <aop:pointcut id="pointcut" expression="execution(* com.lf.service.*.*(..))"/>-->
+    <!--        &lt;!&ndash; 引入事物，并切入 &ndash;&gt;-->
+    <!--        <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut"/>-->
+    <!--    </aop:config>-->
+</beans>
